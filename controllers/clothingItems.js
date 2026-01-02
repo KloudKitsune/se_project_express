@@ -1,4 +1,5 @@
 const ClothingItem = require("../models/clothingItem");
+const mongoose = require("mongoose");
 
 const {
   INTERNAL_SERVER_ERROR_CODE,
