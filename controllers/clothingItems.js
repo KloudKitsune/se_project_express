@@ -5,6 +5,7 @@ const {
   INTERNAL_SERVER_ERROR_CODE,
   BAD_REQUEST_CODE,
   NOT_FOUND_CODE,
+  FORBIDDEN_STATUS_CODE,
 } = require("../utils/errors");
 
 const getClothingItems = (req, res) => {
@@ -77,10 +78,19 @@ const unlikeItem = (req, res) => {
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
-  ClothingItem.findByIdAndDelete(itemId)
+  ClothingItem.findById(itemId)
     .orFail()
     .then((item) => {
-      res.status(200).send({ data: item });
+      // Check if the logged-in user is the owner of the item
+      if (item.owner.toString() !== req.user._id.toString()) {
+        return res.status(FORBIDDEN_STATUS_CODE).send({
+          message: "You do not have permission to delete this item",
+        });
+      }
+      // If user is the owner, delete the item
+      return ClothingItem.findByIdAndDelete(itemId).then((deletedItem) => {
+        res.status(200).send({ data: deletedItem });
+      });
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {

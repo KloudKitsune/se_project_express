@@ -1,6 +1,12 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
 const mainRouter = require("./routes/index");
+const { login, createUser } = require("./controllers/users");
+const { getClothingItems } = require("./controllers/clothingItems");
+const auth = require("./middlewares/auth");
+const clothingItemRoute = require("./routes/clothingItems");
+const userRouter = require("./routes/users");
 
 const app = express();
 const { PORT = 3001 } = process.env;
@@ -12,15 +18,18 @@ mongoose
   })
   .catch(console.error);
 
-app.use((req, res, next) => {
-  req.user = { _id: "695775ee1353b5dc8638479a" };
-  next();
-});
-
-const routes = require("./routes");
-
 app.use(express.json());
-app.use(routes); // new
+app.use(cors());
+
+// Public routes (no auth required)
+app.post("/signin", login);
+app.post("/signup", createUser);
+app.get("/items", getClothingItems);
+
+// Protected routes (auth required)
+app.use(auth);
+app.use("/users", userRouter);
+app.use("/items", clothingItemRoute);
 
 app.use("/", mainRouter);
 
