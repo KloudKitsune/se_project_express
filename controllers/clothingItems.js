@@ -13,10 +13,10 @@ const getClothingItems = (req, res) => {
     .then((items) => {
       res.status(200).send(items);
     })
-    .catch((err) => {
+    .catch(() => {
       res
         .status(INTERNAL_SERVER_ERROR_CODE)
-        .send({ message: "Error from getClothingItems", err });
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -109,22 +109,28 @@ const deleteItem = (req, res) => {
     });
 };
 
+// Creating an item
 const createItem = (req, res) => {
-  console.log(req);
-  console.log(req.body);
-
   const { name, weather, imageUrl } = req.body;
 
-  ClothingItem.create({ name, weather, imageUrl })
-    .then((item) => {
-      console.log(item);
-      res.send({ data: item });
-    })
-    .catch((err) =>
-      res
+  ClothingItem.create({
+    name,
+    weather,
+    imageUrl,
+    owner: req.user._id,
+  })
+    .then((item) => res.status(201).send({ data: item }))
+    .catch((err) => {
+      if (err instanceof mongoose.Error.ValidationError) {
+        return res
+          .status(BAD_REQUEST_CODE)
+          .send({ message: "Invalid data for creating item" });
+      }
+
+      return res
         .status(INTERNAL_SERVER_ERROR_CODE)
-        .send({ message: "Error from createItem", err })
-    );
+        .send({ message: "Error from createItem" });
+    });
 };
 
 module.exports = {

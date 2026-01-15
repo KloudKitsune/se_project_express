@@ -10,20 +10,6 @@ const {
   CONFLICT_STATUS_CODE,
 } = require("../utils/errors");
 
-// GET /users
-
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.status(200).send(users))
-
-    .catch((err) => {
-      console.error(err);
-      return res
-        .status(INTERNAL_SERVER_ERROR_CODE)
-        .send({ message: err.message });
-    });
-};
-
 // POST /users
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
@@ -60,37 +46,12 @@ const createUser = (req, res) => {
       if (err.name === "ValidationError") {
         return res
           .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: err.message });
+          .send({ message: "Invalid user data" });
       }
 
       return res
         .status(INTERNAL_SERVER_ERROR_CODE)
-        .send({ message: err.message });
-    });
-};
-
-const getUser = (req, res) => {
-  const { userId } = req.params;
-
-  User.findById(userId)
-    .orFail()
-    .then((user) => res.status(200).send(user))
-    .catch((err) => {
-      console.error(err);
-
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
-      }
-
-      if (err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: err.message });
-      }
-
-      return res
-        .status(INTERNAL_SERVER_ERROR_CODE)
-        .send({ message: err.message });
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -102,18 +63,20 @@ const getCurrentUser = (req, res) => {
       console.error(err);
 
       if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
+        return res
+          .status(NOT_FOUND_STATUS_CODE)
+          .send({ message: "User not found" });
       }
 
       if (err.name === "CastError") {
         return res
           .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: err.message });
+          .send({ message: "Invalid user ID" });
       }
 
       return res
         .status(INTERNAL_SERVER_ERROR_CODE)
-        .send({ message: err.message });
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -131,24 +94,26 @@ const updateProfile = (req, res) => {
       console.error(err);
 
       if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
+        return res
+          .status(NOT_FOUND_STATUS_CODE)
+          .send({ message: "User not found" });
       }
 
       if (err.name === "ValidationError") {
         return res
           .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: err.message });
+          .send({ message: "Invalid profile data" });
       }
 
       if (err.name === "CastError") {
         return res
           .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: err.message });
+          .send({ message: "Invalid user ID" });
       }
 
       return res
         .status(INTERNAL_SERVER_ERROR_CODE)
-        .send({ message: err.message });
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -164,16 +129,24 @@ const login = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
+      // Check if the error is due to incorrect credentials
+      if (
+        err.message === "User not found" ||
+        err.message === "Invalid password"
+      ) {
+        return res
+          .status(UNAUTHORIZED_STATUS_CODE)
+          .send({ message: "Invalid email or password" });
+      }
+      // For unexpected errors, return 500
       return res
-        .status(UNAUTHORIZED_STATUS_CODE)
-        .send({ message: "Invalid email or password" });
+        .status(INTERNAL_SERVER_ERROR_CODE)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
 module.exports = {
-  getUsers,
   createUser,
-  getUser,
   getCurrentUser,
   updateProfile,
   login,
