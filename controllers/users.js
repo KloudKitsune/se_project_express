@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
 const {
-  INTERNAL_SERVER_ERROR_CODE,
+  INTERNAL_SERVER_STATUS_CODE,
   BAD_REQUEST_STATUS_CODE,
   UNAUTHORIZED_STATUS_CODE,
   NOT_FOUND_STATUS_CODE,
@@ -50,7 +50,7 @@ const createUser = (req, res) => {
       }
 
       return res
-        .status(INTERNAL_SERVER_ERROR_CODE)
+        .status(INTERNAL_SERVER_STATUS_CODE)
         .send({ message: "An error has occurred on the server" });
     });
 };
@@ -75,7 +75,7 @@ const getCurrentUser = (req, res) => {
       }
 
       return res
-        .status(INTERNAL_SERVER_ERROR_CODE)
+        .status(INTERNAL_SERVER_STATUS_CODE)
         .send({ message: "An error has occurred on the server" });
     });
 };
@@ -112,7 +112,7 @@ const updateProfile = (req, res) => {
       }
 
       return res
-        .status(INTERNAL_SERVER_ERROR_CODE)
+        .status(INTERNAL_SERVER_STATUS_CODE)
         .send({ message: "An error has occurred on the server" });
     });
 };
@@ -140,7 +140,7 @@ const login = (req, res) => {
       }
       // For unexpected errors, return 500
       return res
-        .status(INTERNAL_SERVER_ERROR_CODE)
+        .status(INTERNAL_SERVER_STATUS_CODE)
         .send({ message: "An error has occurred on the server" });
     });
 };

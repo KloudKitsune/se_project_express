@@ -2,9 +2,9 @@ const mongoose = require("mongoose");
 const ClothingItem = require("../models/clothingItem");
 
 const {
-  INTERNAL_SERVER_ERROR_CODE,
-  BAD_REQUEST_CODE,
-  NOT_FOUND_CODE,
+  INTERNAL_SERVER_STATUS_CODE,
+  BAD_REQUEST_STATUS_CODE,
+  NOT_FOUND_STATUS_CODE,
   FORBIDDEN_STATUS_CODE,
 } = require("../utils/errors");
 
@@ -15,7 +15,7 @@ const getClothingItems = (req, res) => {
     })
     .catch(() => {
       res
-        .status(INTERNAL_SERVER_ERROR_CODE)
+        .status(INTERNAL_SERVER_STATUS_CODE)
         .send({ message: "An error has occurred on the server" });
     });
 };
@@ -34,15 +34,17 @@ const likeItem = (req, res) => {
     .then((item) => res.status(200).send({ data: item }))
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        return res.status(NOT_FOUND_CODE).send({ message: "Item not found" });
+        return res
+          .status(NOT_FOUND_STATUS_CODE)
+          .send({ message: "Item not found" });
       }
       if (err instanceof mongoose.Error.CastError) {
         return res
-          .status(BAD_REQUEST_CODE)
+          .status(BAD_REQUEST_STATUS_CODE)
           .send({ message: "Invalid item ID" });
       }
       return res
-        .status(INTERNAL_SERVER_ERROR_CODE)
+        .status(INTERNAL_SERVER_STATUS_CODE)
         .send({ message: "Error liking item" });
     });
 };
@@ -62,15 +64,17 @@ const unlikeItem = (req, res) => {
     .then((item) => res.status(200).send({ data: item }))
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        return res.status(NOT_FOUND_CODE).send({ message: "Item not found" });
+        return res
+          .status(NOT_FOUND_STATUS_CODE)
+          .send({ message: "Item not found" });
       }
       if (err instanceof mongoose.Error.CastError) {
         return res
-          .status(BAD_REQUEST_CODE)
+          .status(BAD_REQUEST_STATUS_CODE)
           .send({ message: "Invalid item ID" });
       }
       return res
-        .status(INTERNAL_SERVER_ERROR_CODE)
+        .status(INTERNAL_SERVER_STATUS_CODE)
         .send({ message: "Error unliking item" });
     });
 };
@@ -94,17 +98,19 @@ const deleteItem = (req, res) => {
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        return res.status(NOT_FOUND_CODE).send({ message: "Item not found" });
+        return res
+          .status(NOT_FOUND_STATUS_CODE)
+          .send({ message: "Item not found" });
       }
 
       if (err instanceof mongoose.Error.CastError) {
         return res
-          .status(BAD_REQUEST_CODE)
+          .status(BAD_REQUEST_STATUS_CODE)
           .send({ message: "Invalid item ID" });
       }
 
       return res
-        .status(INTERNAL_SERVER_ERROR_CODE)
+        .status(INTERNAL_SERVER_STATUS_CODE)
         .send({ message: "Error deleting item" });
     });
 };
@@ -123,12 +129,12 @@ const createItem = (req, res) => {
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
         return res
-          .status(BAD_REQUEST_CODE)
+          .status(BAD_REQUEST_STATUS_CODE)
           .send({ message: "Invalid data for creating item" });
       }
 
       return res
-        .status(INTERNAL_SERVER_ERROR_CODE)
+        .status(INTERNAL_SERVER_STATUS_CODE)
         .send({ message: "Error from createItem" });
     });
 };
