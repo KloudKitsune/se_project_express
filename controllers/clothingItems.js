@@ -23,10 +23,10 @@ const getClothingItems = (req, res) => {
 // PUT /items/:id/likes
 
 const likeItem = (req, res) => {
-  const { id } = req.params;
+  const { itemId } = req.params;
 
   ClothingItem.findByIdAndUpdate(
-    id,
+    itemId,
     { $addToSet: { likes: req.user._id } },
     { new: true }
   )
@@ -53,10 +53,10 @@ const likeItem = (req, res) => {
 // Unlike an item
 
 const unlikeItem = (req, res) => {
-  const { id } = req.params;
+  const { itemId } = req.params;
 
   ClothingItem.findByIdAndUpdate(
-    id,
+    itemId,
     { $pull: { likes: req.user._id } },
     { new: true }
   )
