@@ -1,28 +1,21 @@
 const mongoose = require("mongoose");
 const ClothingItem = require("../models/clothingItem");
 
-const {
-  INTERNAL_SERVER_STATUS_CODE,
-  BAD_REQUEST_STATUS_CODE,
-  NOT_FOUND_STATUS_CODE,
-  FORBIDDEN_STATUS_CODE,
-} = require("../utils/errors");
+const BadRequestError = require("./errors/bad-request-err");
+const NotFoundError = require("./errors/not-found-err");
+const ForbiddenError = require("./errors/forbidden-err");
 
-const getClothingItems = (req, res) => {
+// GET /items
+const getClothingItems = (req, res, next) => {
   ClothingItem.find({})
     .then((items) => {
       res.status(200).send(items);
     })
-    .catch(() => {
-      res
-        .status(INTERNAL_SERVER_STATUS_CODE)
-        .send({ message: "An error has occurred on the server" });
-    });
+    .catch(next); // let centralized middleware handle 500
 };
 
-// PUT /items/:id/likes
-
-const likeItem = (req, res) => {
+// PUT /items/:itemId/likes
+const likeItem = (req, res, next) => {
   const { itemId } = req.params;
 
   ClothingItem.findByIdAndUpdate(
@@ -31,28 +24,24 @@ const likeItem = (req, res) => {
     { new: true }
   )
     .orFail()
-    .then((item) => res.status(200).send({ data: item }))
+    .then((item) => {
+      res.status(200).send({ data: item });
+    })
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        return res
-          .status(NOT_FOUND_STATUS_CODE)
-          .send({ message: "Item not found" });
+        return next(new NotFoundError("Item not found"));
       }
+
       if (err instanceof mongoose.Error.CastError) {
-        return res
-          .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: "Invalid item ID" });
+        return next(new BadRequestError("Invalid item ID"));
       }
-      return res
-        .status(INTERNAL_SERVER_STATUS_CODE)
-        .send({ message: "Error liking item" });
+
+      return next(err);
     });
 };
 
-// DELETE /items/:id/likes
-// Unlike an item
-
-const unlikeItem = (req, res) => {
+// DELETE /items/:itemId/likes
+const unlikeItem = (req, res, next) => {
   const { itemId } = req.params;
 
   ClothingItem.findByIdAndUpdate(
@@ -61,62 +50,55 @@ const unlikeItem = (req, res) => {
     { new: true }
   )
     .orFail()
-    .then((item) => res.status(200).send({ data: item }))
+    .then((item) => {
+      res.status(200).send({ data: item });
+    })
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        return res
-          .status(NOT_FOUND_STATUS_CODE)
-          .send({ message: "Item not found" });
+        return next(new NotFoundError("Item not found"));
       }
+
       if (err instanceof mongoose.Error.CastError) {
-        return res
-          .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: "Invalid item ID" });
+        return next(new BadRequestError("Invalid item ID"));
       }
-      return res
-        .status(INTERNAL_SERVER_STATUS_CODE)
-        .send({ message: "Error unliking item" });
+
+      return next(err);
     });
 };
 
-const deleteItem = (req, res) => {
+// DELETE /items/:itemId
+const deleteItem = (req, res, next) => {
   const { itemId } = req.params;
 
   ClothingItem.findById(itemId)
     .orFail()
     .then((item) => {
-      // Check if the logged-in user is the owner of the item
       if (item.owner.toString() !== req.user._id.toString()) {
-        return res.status(FORBIDDEN_STATUS_CODE).send({
-          message: "You do not have permission to delete this item",
-        });
+        throw new ForbiddenError(
+          "You do not have permission to delete this item"
+        );
       }
-      // If user is the owner, delete the item
-      return ClothingItem.findByIdAndDelete(itemId).then((deletedItem) => {
-        res.status(200).send({ data: deletedItem });
-      });
+
+      return ClothingItem.findByIdAndDelete(itemId);
+    })
+    .then((deletedItem) => {
+      res.status(200).send({ data: deletedItem });
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        return res
-          .status(NOT_FOUND_STATUS_CODE)
-          .send({ message: "Item not found" });
+        return next(new NotFoundError("Item not found"));
       }
 
       if (err instanceof mongoose.Error.CastError) {
-        return res
-          .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: "Invalid item ID" });
+        return next(new BadRequestError("Invalid item ID"));
       }
 
-      return res
-        .status(INTERNAL_SERVER_STATUS_CODE)
-        .send({ message: "Error deleting item" });
+      return next(err);
     });
 };
 
-// Creating an item
-const createItem = (req, res) => {
+// POST /items
+const createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
 
   ClothingItem.create({
@@ -125,17 +107,15 @@ const createItem = (req, res) => {
     imageUrl,
     owner: req.user._id,
   })
-    .then((item) => res.status(201).send({ data: item }))
+    .then((item) => {
+      res.status(201).send({ data: item });
+    })
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        return res
-          .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: "Invalid data for creating item" });
+        return next(new BadRequestError("Invalid data for creating item"));
       }
 
-      return res
-        .status(INTERNAL_SERVER_STATUS_CODE)
-        .send({ message: "Error from createItem" });
+      return next(err);
     });
 };
 
