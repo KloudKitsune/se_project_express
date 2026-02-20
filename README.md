@@ -35,4 +35,4 @@ https://github.com/KloudKitsune/se_project_react
 
 ## PROJECT PITCH VIDEO
 
-Pending...
+https://drive.google.com/file/d/1vnZQw3BXmNtKiBai_ZTurmJCDOmbYsoj/view?usp=sharing
