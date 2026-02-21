@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const mainRouter = require("./routes/index");
 const errorHandler = require("./middlewares/error-handler");
+// eslint-disable-next-line import/order
 const { errors } = require("celebrate");
 const { requestLogger, errorLogger } = require("./middlewares/logger"); // Winston loggers
 
@@ -19,6 +20,12 @@ mongoose
   .catch((err) => {
     console.error("Error connecting to DB:", err);
   });
+
+app.get("/crash-test", () => {
+  setTimeout(() => {
+    throw new Error("Server will crash now");
+  }, 0);
+});
 
 // Parse JSON
 app.use(express.json());

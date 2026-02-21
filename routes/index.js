@@ -4,20 +4,24 @@ const { getClothingItems } = require("../controllers/clothingItems");
 const auth = require("../middlewares/auth");
 const clothingItemRoute = require("./clothingItems");
 const userRouter = require("./users");
-const { NOT_FOUND_STATUS_CODE } = require("../utils/errors");
+const NotFoundError = require("../controllers/errors/not-found-err");
+const {
+  validateLogin,
+  validateCreateUser,
+} = require("../middlewares/validation");
 
 // Public routes (no auth required)
-router.post("/signin", login);
-router.post("/signup", createUser);
+router.post("/signin", validateLogin, login);
+router.post("/signup", validateCreateUser, createUser);
 router.get("/items", getClothingItems);
 
 // Protected routes (auth required)
 router.use("/users", auth, userRouter);
 router.use("/items", auth, clothingItemRoute);
 
-// Catch-all 404 handler (outside auth chain)
-router.use((req, res) => {
-  res.status(NOT_FOUND_STATUS_CODE).send({ message: "Router not found" });
+// Catch-all 404 handler (outside auth chain) - throw error for centralized handling
+router.use((req, res, next) => {
+  throw new NotFoundError("Router not found");
 });
 
 module.exports = router;

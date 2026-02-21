@@ -9,7 +9,7 @@ const validateURL = (value, helpers) => {
   return helpers.error("string.uri"); // matches Joi URI error code
 };
 
-// 1️⃣ Clothing item creation validation
+// Clothing item creation validation
 const validateCreateClothingItem = celebrate({
   [Segments.BODY]: Joi.object().keys({
     name: Joi.string().required().min(2).max(30).messages({
@@ -24,7 +24,7 @@ const validateCreateClothingItem = celebrate({
   }),
 });
 
-// 2️⃣ User creation validation
+// User creation validation
 const validateCreateUser = celebrate({
   [Segments.BODY]: Joi.object().keys({
     name: Joi.string().min(2).max(30).messages({
@@ -45,7 +45,7 @@ const validateCreateUser = celebrate({
   }),
 });
 
-// 3️⃣ Login validation
+// Login validation
 const validateLogin = celebrate({
   [Segments.BODY]: Joi.object().keys({
     email: Joi.string().required().email().messages({
@@ -58,7 +58,7 @@ const validateLogin = celebrate({
   }),
 });
 
-// 4️⃣ User ID validation (URL param)
+// User ID validation (URL param)
 const validateUserId = celebrate({
   [Segments.PARAMS]: Joi.object().keys({
     userId: Joi.string().hex().length(24).required().messages({
@@ -69,7 +69,7 @@ const validateUserId = celebrate({
   }),
 });
 
-// 5️⃣ Clothing item ID validation (URL param)
+// Clothing item ID validation (URL param)
 const validateClothingItemId = celebrate({
   [Segments.PARAMS]: Joi.object().keys({
     itemId: Joi.string().hex().length(24).required().messages({
