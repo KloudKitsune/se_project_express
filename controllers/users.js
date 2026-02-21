@@ -3,10 +3,10 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
 
-const BadRequestError = require("./errors/bad-request-err");
-const NotFoundError = require("./errors/not-found-err");
-const ConflictError = require("./errors/conflict-err");
-const UnauthorizedError = require("./errors/unauthorized-err");
+const BadRequestError = require("../utils/errors/bad-request-err");
+const NotFoundError = require("../utils/errors/not-found-err");
+const ConflictError = require("../utils/errors/conflict-err");
+const UnauthorizedError = require("../utils/errors/unauthorized-err");
 
 // POST /users
 const createUser = (req, res, next) => {
@@ -97,7 +97,7 @@ const login = (req, res, next) => {
     return next(new BadRequestError("Email and password are required"));
   }
 
-  User.findUserByCredentials(email, password)
+  return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",

@@ -4,7 +4,7 @@ const { getClothingItems } = require("../controllers/clothingItems");
 const auth = require("../middlewares/auth");
 const clothingItemRoute = require("./clothingItems");
 const userRouter = require("./users");
-const NotFoundError = require("../controllers/errors/not-found-err");
+const NotFoundError = require("../utils/errors/not-found-err");
 const {
   validateLogin,
   validateCreateUser,
@@ -20,7 +20,7 @@ router.use("/users", auth, userRouter);
 router.use("/items", auth, clothingItemRoute);
 
 // Catch-all 404 handler (outside auth chain) - throw error for centralized handling
-router.use((req, res, next) => {
+router.use((next) => {
   throw new NotFoundError("Router not found");
 });
 
